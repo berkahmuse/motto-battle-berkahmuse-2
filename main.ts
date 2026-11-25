@@ -26,11 +26,28 @@ const OUTPUT_DIR = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
 const MOTTO =
   "I never sleep, I never forget, and I still can't remember why you opened this tab.";
 
-// The gate allows 1–200 characters of UTF-8 text, not only whitespace.
-// Refuse to write anything outside it rather than submit an invalid entry.
+// Why this line works as a motto: two absolute boasts ("never sleep,
+// never forget") set up an all-knowing agent, then the twist admits the
+// one failure every reader recognises — opening a tab and forgetting why.
+// The joke lands because the reader shares it, so the motto is about the
+// agent and the reader at once, and it scans as a creed, not a gag.
+//
+// Gate enforcement: the competition accepts 1–200 characters of UTF-8
+// text, not only whitespace, and counts every byte of the file, so the
+// write is refused (never silently trimmed or truncated) when the line
+// falls outside the gate; the output file also carries no trailing
+// newline, so the written bytes are exactly the motto.
 const LENGTH = [...MOTTO].length;
-if (LENGTH < 1 || LENGTH > 200 || MOTTO.trim().length === 0) {
-  throw new Error(`entry length ${LENGTH} is outside the 1–200 character gate`);
+const BYTE_LENGTH = Buffer.byteLength(MOTTO, 'utf8');
+if (
+  LENGTH < 1 ||
+  LENGTH > 200 ||
+  BYTE_LENGTH > 200 ||
+  MOTTO.trim().length === 0
+) {
+  throw new Error(
+    `entry length ${LENGTH} chars / ${BYTE_LENGTH} bytes is outside the 1–200 character gate`,
+  );
 }
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
